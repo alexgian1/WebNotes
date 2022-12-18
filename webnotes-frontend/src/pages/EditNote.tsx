@@ -19,8 +19,9 @@ export class EditNote extends JSX.Component<EditNoteProps, EditNoteState> {
 
     render() {
         return (
-            <Stack spacing={1}>
-                <ReactQuill theme="snow" 
+            <Stack margin={5} spacing={1}>
+                <ReactQuill 
+                    theme="snow" 
                     value={this.state.noteValue} 
                     onChange={(value) => this.setState({noteValue: value})}
                 />
