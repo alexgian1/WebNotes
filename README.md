@@ -7,7 +7,7 @@ An optional database-backed mode can be added later for the notes to be stored o
 ## Prerequisites
 
 - Git
-- Node.js with npm
+- Node.js 18 or newer with npm
 - Java 17
 
 ## Project Structure
@@ -15,7 +15,7 @@ An optional database-backed mode can be added later for the notes to be stored o
 - `webnotes-frontend` - React frontend
 - `webnotes-backend` - Spring Boot backend
 
-## Clone and Launch
+## Local Setup
 
 ```bash
 cd webnotes-frontend

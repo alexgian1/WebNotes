@@ -22,7 +22,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingMenu />}/>
           <Route path="/editNote" element={
-            <EditNote intialValue="WebNotes is currently using localstorage to save and load notes. Enter text..."/>
+            <EditNote initialValue="WebNotes is currently using local storage to save and load notes. Enter text..."/>
           }/>
         </Routes>
       </BrowserRouter>
