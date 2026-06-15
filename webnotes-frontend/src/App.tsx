@@ -1,6 +1,5 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import './App.css';
 import {EditNote} from './pages/EditNote';
 import { LandingMenu } from './pages/LandingMenu';
 import {
