@@ -1,7 +1,6 @@
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { CssBaseline } from '@mui/material';
-import {EditNote} from './pages/EditNote';
-import { LandingMenu } from './pages/LandingMenu';
+import { LocalNotesPage } from './features/localNotes/components/LocalNotesPage';
 import {
   BrowserRouter,
   Routes,
@@ -20,10 +19,7 @@ function App() {
       <CssBaseline />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingMenu />}/>
-          <Route path="/editNote" element={
-            <EditNote initialValue="WebNotes is currently using local storage to save and load notes. Enter text..."/>
-          }/>
+          <Route path="/" element={<LocalNotesPage />}/>
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

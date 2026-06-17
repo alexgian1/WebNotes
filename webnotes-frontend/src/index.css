@@ -11,3 +11,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.local-note-editor {
+  margin-bottom: 8px;
+}
+
+.local-note-editor .ql-container {
+  height: 320px;
+}
+
+.local-note-editor .ql-editor {
+  height: 100%;
+}
