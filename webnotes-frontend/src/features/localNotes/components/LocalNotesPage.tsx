@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Box,
@@ -7,7 +7,6 @@ import {
   Fab,
   Snackbar,
   Stack,
-  Typography,
   useMediaQuery,
   useTheme,
 } from '@mui/material';
@@ -17,12 +16,20 @@ import { LocalNotesList } from './LocalNotesList';
 import { UnsavedChangesDialog } from './UnsavedChangesDialog';
 import { LocalNote } from '../model/LocalNote';
 import { useLocalNotesWorkspace } from '../hooks/useLocalNotesWorkspace';
+import { useLocalNotesSearch } from '../hooks/useLocalNotesSearch';
+import { LocalNotesSortMode } from './LocalNotesList';
 
 export function LocalNotesPage() {
   const workspace = useLocalNotesWorkspace();
+  const search = useLocalNotesSearch(workspace.localNotes);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [isNotesDrawerOpen, setIsNotesDrawerOpen] = useState(false);
+  const [sortMode, setSortMode] = useState<LocalNotesSortMode>('date');
+
+  const visibleLocalNotes = useMemo(() => {
+    return sortLocalNotes(search.filteredLocalNotes, sortMode);
+  }, [search.filteredLocalNotes, sortMode]);
 
   useEffect(() => {
     if (!isMobile) {
@@ -56,45 +63,93 @@ export function LocalNotesPage() {
 
   const notesList = (
     <LocalNotesList
-      localNotes={workspace.localNotes}
+      localNotes={visibleLocalNotes}
+      totalLocalNotesCount={search.totalLocalNotesCount}
+      searchQuery={search.searchQuery}
+      onSearchQueryChange={search.setSearchQuery}
+      onClearSearchQuery={search.clearSearchQuery}
+      sortMode={sortMode}
+      onSortModeChange={setSortMode}
       selectedLocalNoteId={workspace.draft?.id}
       onSelectLocalNote={handleSelectLocalNote}
     />
   );
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', p: 3 }}>
+    <Box
+      sx={{
+        height: '100dvh',
+        bgcolor: 'background.default',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
       <Box
         sx={{
-          display: 'flex',
+          display: { xs: 'flex', md: 'none' },
           alignItems: 'center',
-          gap: 1,
-          mb: 3,
+          px: 2,
+          pt: 2,
+          pb: 1,
+          flexShrink: 0,
         }}
       >
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
-          <IconButton
-            aria-label="Open notes menu"
-            onClick={openNotesDrawer}
-            color="inherit"
-            sx={{ display: { xs: 'inline-flex', md: 'none' }, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}
-          >
-            <Box sx={{ display: 'grid', gap: 0.4 }}>
-              <Box sx={{ width: 18, height: 2, bgcolor: 'currentColor', borderRadius: 1 }} />
-              <Box sx={{ width: 18, height: 2, bgcolor: 'currentColor', borderRadius: 1 }} />
-              <Box sx={{ width: 18, height: 2, bgcolor: 'currentColor', borderRadius: 1 }} />
-            </Box>
-          </IconButton>
-          <Typography variant="h6" component="h1" noWrap>
-            Local Notes
-          </Typography>
-        </Box>
+        <IconButton
+          aria-label="Open notes menu"
+          onClick={openNotesDrawer}
+          color="inherit"
+          sx={{
+            border: '1px solid',
+            borderColor: 'divider',
+            borderRadius: 1,
+            bgcolor: 'background.default',
+          }}
+        >
+          <Box sx={{ display: 'grid', gap: 0.4 }}>
+            <Box sx={{ width: 18, height: 2, bgcolor: 'currentColor', borderRadius: 1 }} />
+            <Box sx={{ width: 18, height: 2, bgcolor: 'currentColor', borderRadius: 1 }} />
+            <Box sx={{ width: 18, height: 2, bgcolor: 'currentColor', borderRadius: 1 }} />
+          </Box>
+        </IconButton>
       </Box>
 
-      <Stack direction="row" spacing={3} sx={{ alignItems: 'flex-start' }}>
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>{notesList}</Box>
+      <Stack
+        direction="row"
+        spacing={3}
+        sx={{
+          alignItems: 'stretch',
+          flex: 1,
+          minHeight: 0,
+          overflow: 'hidden',
+        }}
+      >
+        <Box
+          sx={{
+            display: { xs: 'none', md: 'block' },
+            alignSelf: 'stretch',
+            height: '100%',
+            minHeight: 0,
+            pl: 3,
+            pt: 3,
+            pb: 3,
+          }}
+        >
+          {notesList}
+        </Box>
 
-        <Stack spacing={2} sx={{ flex: 1, minWidth: 0 }}>
+        <Stack
+          spacing={2}
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            minHeight: 0,
+            pt: { xs: 1, md: 2 },
+            pr: { xs: 2, md: 3 },
+            overflow: 'visible',
+          }}
+        >
           <LocalNoteEditor
             draft={workspace.draft}
             isDirty={workspace.isDirty}
@@ -111,9 +166,16 @@ export function LocalNotesPage() {
         open={isNotesDrawerOpen}
         onClose={closeNotesDrawer}
         ModalProps={{ keepMounted: true }}
-        PaperProps={{ sx: { width: 'min(100vw, 360px)', p: 2 } }}
+        PaperProps={{
+          sx: {
+            width: 'min(100vw, 360px)',
+            height: '100dvh',
+            boxSizing: 'border-box',
+            overflow: 'hidden',
+          },
+        }}
       >
-        {notesList}
+        <Box sx={{ p: 2, height: '100%', boxSizing: 'border-box' }}>{notesList}</Box>
       </Drawer>
 
       <Fab
@@ -159,4 +221,20 @@ export function LocalNotesPage() {
       </Snackbar>
     </Box>
   );
+}
+
+function sortLocalNotes(localNotes: LocalNote[], sortMode: LocalNotesSortMode) {
+  return [...localNotes].sort((left, right) => {
+    if (sortMode === 'alphabetical') {
+      const titleComparison = left.title.localeCompare(right.title, undefined, {
+        sensitivity: 'base',
+      });
+
+      if (titleComparison !== 0) {
+        return titleComparison;
+      }
+    }
+
+    return right.updatedAt.localeCompare(left.updatedAt);
+  });
 }
