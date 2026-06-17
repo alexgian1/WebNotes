@@ -24,7 +24,14 @@ export function LocalNoteEditor({
 }: LocalNoteEditorProps) {
   if (!draft) {
     return (
-      <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, p: 3 }}>
+      <Box
+        sx={{
+          border: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 1,
+          p: 3,
+        }}
+      >
         <Typography color="text.secondary">
           Create a local note to start writing.
         </Typography>
